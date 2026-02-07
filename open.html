@@ -96,49 +96,18 @@
         margin-bottom: 15px;
         font-size: 14px;
       }
-      .update-link {
-        display: block;
-        margin-top: 20px;
-        color: #4ecdc4;
-        font-size: 14px;
-        text-decoration: none;
-      }
-      .update-link:hover {
-        text-decoration: underline;
-      }
-      .version-badge {
-        display: inline-block;
-        background: rgba(78, 205, 196, 0.2);
-        color: #4ecdc4;
-        padding: 4px 10px;
-        border-radius: 12px;
-        font-size: 12px;
-        margin-top: 10px;
-      }
     </style>
   </head>
   <body>
     <div class="container">
       <div class="logo">📍</div>
       <h1>People Tracker</h1>
-      <span
-        id="latest-version"
-        class="version-badge"
-        style="display: none"
-      ></span>
 
       <!-- Loading state - shown while trying to open app -->
       <div id="loading-state">
         <h2>Opening app...</h2>
         <div class="spinner"></div>
         <p style="color: #a8b2d1">Attempting to launch People Tracker</p>
-        <a
-          href="https://drive.google.com/uc?export=download&id=17sLqCmvPAdppFCZi1QRV9RVvAXUAtoYv"
-          class="update-link"
-          target="_blank"
-        >
-          🔄 Check for updates
-        </a>
       </div>
 
       <!-- Fallback state - shown if app doesn't open -->
@@ -211,22 +180,6 @@
             document.getElementById("fallback-state").style.display = "block";
           }
         }, timeout);
-
-        // Fetch latest version from GitHub releases
-        fetch(
-          "https://api.github.com/repos/sendilb191/people-tracker-app-mobile/releases/latest",
-        )
-          .then(function (response) {
-            return response.json();
-          })
-          .then(function (data) {
-            if (data.tag_name) {
-              var versionBadge = document.getElementById("latest-version");
-              versionBadge.textContent = "Latest: " + data.tag_name;
-              versionBadge.style.display = "inline-block";
-            }
-          })
-          .catch(function () {});
       })();
     </script>
   </body>
