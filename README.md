@@ -10,6 +10,29 @@ People Tracker is a real-time location sharing app for friends and family. This 
 - Handle deep links to open the mobile app
 - Provide APK download for Android users
 - Host documentation for the mobile app
+- Manage and upload releases
+
+## Project Structure
+
+```
+people-tracker-pages/
+├── css/
+│   ├── common.css      # Shared styles (variables, base, header, buttons, forms)
+│   ├── home.css        # Home page specific styles
+│   ├── docs.css        # Documentation page styles
+│   ├── open.css        # Download/open page styles
+│   └── releases.css    # Releases page styles
+├── js/
+│   ├── docs.js         # Documentation page logic
+│   ├── open.js         # Deep link handling logic
+│   └── releases.js     # Releases page logic (fetch & upload)
+├── index.html          # Main landing page
+├── docs.html           # Documentation page
+├── docs.md             # Markdown source for documentation
+├── open.html           # Deep link handler / download page
+├── releases.html       # Release management page
+└── README.md
+```
 
 ## Pages
 
@@ -19,7 +42,7 @@ People Tracker is a real-time location sharing app for friends and family. This 
 | `docs.html`     | Full documentation rendered from the mobile app README                                                                      |
 | `docs.md`       | Markdown source for documentation (synced from mobile app repo)                                                             |
 | `open.html`     | Deep link handler - attempts to open the app via `peopletracker://` URL scheme, falls back to APK download if not installed |
-| `releases.html` | Displays APK releases from GitHub Releases with download links                                                              |
+| `releases.html` | Displays APK releases and allows uploading new releases to GitHub                                                           |
 
 ## Deep Link Flow
 
@@ -32,10 +55,12 @@ When a user visits `open.html`:
    - Manual "Open App" button
    - Installation instructions
 
-## Installation
+## Releases
 
-1. Place the APK file in the `app/` directory as `people-tracker.apk`
-2. Host the pages on any static web server
+The `releases.html` page allows you to:
+
+- View all GitHub releases with APK download links
+- Upload new releases directly from the browser (requires GitHub PAT with `repo` scope)
 
 ## URL Scheme
 
@@ -44,5 +69,6 @@ The app uses the custom URL scheme: `peopletracker://`
 ## Tech Stack
 
 - Pure HTML/CSS/JavaScript
+- CSS Variables for theming
 - No build tools or dependencies required
 - Mobile-responsive design

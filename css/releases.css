@@ -1,0 +1,165 @@
+/* ===================================
+   People Tracker - Releases Page
+   =================================== */
+
+.releases-container {
+  text-align: center;
+}
+
+/* Release Cards */
+.releases-list {
+  text-align: left;
+}
+
+.release-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 20px;
+}
+
+.release-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.release-version {
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--color-primary);
+}
+
+.release-date {
+  color: var(--color-text-muted);
+  font-size: 14px;
+}
+
+.release-tag {
+  display: inline-block;
+  background: rgba(233, 69, 96, 0.2);
+  color: var(--color-primary);
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  margin-left: 8px;
+}
+
+.release-tag.latest {
+  background: rgba(46, 213, 115, 0.2);
+  color: var(--color-success);
+}
+
+.release-notes {
+  color: #ccd6f6;
+  font-size: 14px;
+  line-height: 1.6;
+  margin-bottom: 16px;
+  white-space: pre-wrap;
+}
+
+.release-assets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.asset-size {
+  font-weight: 400;
+  opacity: 0.7;
+}
+
+.no-releases {
+  color: var(--color-text-muted);
+  padding: 40px;
+  text-align: center;
+}
+
+.no-releases a {
+  color: var(--color-primary);
+}
+
+/* Upload Section */
+.upload-section {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 30px;
+  text-align: left;
+}
+
+.upload-section h2 {
+  font-size: 18px;
+  color: var(--color-primary);
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+}
+
+.btn-upload {
+  width: 100%;
+  font-size: 16px;
+  padding: 14px;
+}
+
+.upload-status {
+  margin-top: 16px;
+  display: none;
+}
+
+.upload-status.visible {
+  display: block;
+}
+
+.token-help {
+  font-size: 12px;
+  color: var(--color-text-dim);
+  margin-top: 4px;
+}
+
+.token-help a {
+  color: var(--color-primary);
+}
+
+.toggle-upload {
+  background: none;
+  border: 1px solid var(--color-border-light);
+  color: var(--color-text-muted);
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  margin-bottom: 20px;
+  transition: all 0.2s;
+}
+
+.toggle-upload:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.upload-form {
+  display: none;
+}
+
+.upload-form.visible {
+  display: block;
+}
+
+.loading-releases {
+  color: var(--color-text-muted);
+  padding: 40px;
+}
+
+.error-releases {
+  color: var(--color-error);
+  padding: 40px;
+}
