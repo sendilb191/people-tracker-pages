@@ -75,17 +75,27 @@ async function uploadRelease(event) {
     }
 
     const release = await createResponse.json();
-    showStatus("loading", "Uploading APK file...");
+    showStatus("loading", "Uploading file...");
 
-    // Step 2: Upload the APK as an asset
+    // Step 2: Upload the file as an asset
     const uploadUrl = release.upload_url.replace("{?name,label}", "");
+    
+    // Determine content type based on file extension
+    const fileName = apkFile.name.toLowerCase();
+    let contentType = "application/octet-stream";
+    if (fileName.endsWith(".apk")) {
+      contentType = "application/vnd.android.package-archive";
+    } else if (fileName.endsWith(".json")) {
+      contentType = "application/json";
+    }
+    
     const assetResponse = await fetch(
       `${uploadUrl}?name=${encodeURIComponent(apkFile.name)}`,
       {
         method: "POST",
         headers: {
           Authorization: `token ${token}`,
-          "Content-Type": "application/vnd.android.package-archive",
+          "Content-Type": contentType,
         },
         body: apkFile,
       },
@@ -93,7 +103,7 @@ async function uploadRelease(event) {
 
     if (!assetResponse.ok) {
       const errorData = await assetResponse.json();
-      throw new Error(errorData.message || "Failed to upload APK");
+      throw new Error(errorData.message || "Failed to upload file");
     }
 
     showStatus("success", `✅ Release ${version} created successfully!`);
