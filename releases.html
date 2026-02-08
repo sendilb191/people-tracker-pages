@@ -6,6 +6,7 @@
     <title>Releases - People Tracker</title>
     <link rel="stylesheet" href="css/common.css" />
     <link rel="stylesheet" href="css/releases.css" />
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   </head>
   <body>
     <header>
@@ -33,67 +34,16 @@
         <h2>🚀 Upload New Release</h2>
         <form id="release-form" onsubmit="uploadRelease(event)">
           <div class="form-group">
-            <label for="github-token">GitHub Personal Access Token</label>
-            <input
-              type="password"
-              id="github-token"
-              placeholder="ghp_xxxxxxxxxxxx"
-              required
-            />
-            <div class="token-options">
-              <label class="checkbox-label">
-                <input type="checkbox" id="remember-token" /> Remember token
-              </label>
-              <button
-                type="button"
-                class="btn-link"
-                onclick="clearSavedToken()"
-              >
-                Clear saved token
-              </button>
-            </div>
-            <p class="token-help">
-              Need a token?
-              <a
-                href="https://github.com/settings/tokens/new?scopes=repo&description=People%20Tracker%20Releases"
-                target="_blank"
-                >Create one here</a
-              >
-              with "repo" scope
-            </p>
+            <label for="apk-file">APK File (max 100MB)</label>
+            <input type="file" id="apk-file" accept=".apk" required />
+            <p class="form-note">Uploading will replace the existing APK.</p>
           </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label for="version">Version Tag</label>
-              <input type="text" id="version" placeholder="v1.0.0" required />
-            </div>
-            <div class="form-group">
-              <label for="release-name">Release Name</label>
-              <input
-                type="text"
-                id="release-name"
-                placeholder="Version 1.0.0"
-                required
-              />
-            </div>
-          </div>
-          <div class="form-group">
-            <label for="release-notes">Release Notes</label>
-            <textarea
-              id="release-notes"
-              placeholder="What's new in this release..."
-            ></textarea>
-          </div>
-          <p class="form-note">
-            After creating the release, you'll be linked to GitHub to attach the
-            APK file.
-          </p>
           <button
             type="submit"
             class="btn btn-success btn-upload"
             id="upload-btn"
           >
-            🚀 Create Release
+            🚀 Upload APK
           </button>
           <div class="upload-status" id="upload-status"></div>
         </form>
@@ -107,7 +57,7 @@
     <script src="js/releases.js"></script>
 
     <footer class="site-footer">
-      <span class="deploy-time">Deployed: 2026-02-08 16:46 IST</span>
+      <span class="deploy-time">Deployed: 2026-02-08 17:30 IST</span>
     </footer>
   </body>
 </html>

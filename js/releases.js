@@ -1,96 +1,87 @@
 /* ===================================
    People Tracker - Releases Page JavaScript
+   Supabase Storage Only (No Database)
    =================================== */
 
-const GITHUB_REPO = "sendilb191/people-tracker-pages";
-const GITHUB_API = `https://api.github.com/repos/${GITHUB_REPO}/releases`;
-const TOKEN_STORAGE_KEY = "pt_github_token";
+// Supabase configuration
+const SUPABASE_URL = "https://yxfhfyzihzsxnojookwm.supabase.co";
+const SUPABASE_ANON_KEY =
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl4ZmhmeXppaHpzeG5vam9va3dtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY3NTMwMTksImV4cCI6MjA4MjMyOTAxOX0.ro95fWynSjqiv6BYPRQCalDZOkqqimN_BsdrwFxuyOs";
+const STORAGE_BUCKET = "people-tracker-app-apk";
+const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB
+
+// Initialize Supabase client
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 function toggleUploadForm() {
   const form = document.getElementById("upload-form");
   form.classList.toggle("visible");
 }
 
-function loadSavedToken() {
-  const savedToken = localStorage.getItem(TOKEN_STORAGE_KEY);
-  if (savedToken) {
-    document.getElementById("github-token").value = savedToken;
-    document.getElementById("remember-token").checked = true;
-  }
-}
-
-function saveToken(token) {
-  const rememberToken = document.getElementById("remember-token").checked;
-  if (rememberToken && token) {
-    localStorage.setItem(TOKEN_STORAGE_KEY, token);
-  } else {
-    localStorage.removeItem(TOKEN_STORAGE_KEY);
-  }
-}
-
-function clearSavedToken() {
-  localStorage.removeItem(TOKEN_STORAGE_KEY);
-  document.getElementById("github-token").value = "";
-  document.getElementById("remember-token").checked = false;
-}
-
 async function uploadRelease(event) {
   event.preventDefault();
 
-  const token = document.getElementById("github-token").value;
-  const version = document.getElementById("version").value;
-  const releaseName = document.getElementById("release-name").value;
-  const releaseNotes = document.getElementById("release-notes").value;
-  const statusEl = document.getElementById("upload-status");
+  const apkFile = document.getElementById("apk-file").files[0];
   const uploadBtn = document.getElementById("upload-btn");
 
+  if (!apkFile) {
+    showStatus("error", "❌ Please select an APK file");
+    return;
+  }
+
+  // Check file size
+  if (apkFile.size > MAX_FILE_SIZE) {
+    showStatus("error", "❌ APK file must be less than 100MB");
+    return;
+  }
+
   uploadBtn.disabled = true;
-  showStatus("loading", "Creating release...");
+  showStatus("loading", "Deleting old APK...");
 
   try {
-    // Create the release
-    const createResponse = await fetch(GITHUB_API, {
-      method: "POST",
-      headers: {
-        Authorization: `token ${token}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        tag_name: version,
-        name: releaseName,
-        body: releaseNotes,
-        prerelease: false,
-      }),
-    });
+    // List all existing files in the bucket
+    const { data: existingFiles, error: listError } = await supabase.storage
+      .from(STORAGE_BUCKET)
+      .list();
 
-    if (!createResponse.ok) {
-      const errorData = await createResponse.json();
-      throw new Error(errorData.message || "Failed to create release");
+    if (listError) {
+      console.warn("Could not list files:", listError.message);
     }
 
-    const release = await createResponse.json();
+    // Delete all existing APK files
+    if (existingFiles && existingFiles.length > 0) {
+      const filesToDelete = existingFiles.map((f) => f.name);
+      const { error: deleteError } = await supabase.storage
+        .from(STORAGE_BUCKET)
+        .remove(filesToDelete);
 
-    // Note: GitHub's uploads.github.com doesn't support CORS for browser uploads
-    // Direct users to attach files via GitHub's web UI
-    const editUrl = `https://github.com/${GITHUB_REPO}/releases/edit/${version}`;
+      if (deleteError) {
+        console.warn("Could not delete old files:", deleteError.message);
+      }
+    }
 
-    showStatus(
-      "success",
-      `✅ Release ${version} created! <a href="${editUrl}" target="_blank" style="color: var(--color-primary);">Attach file on GitHub →</a>`,
-    );
+    showStatus("loading", "Uploading new APK...");
 
-    // Save token if remember is checked
-    saveToken(token);
+    // Upload new APK
+    const fileName = apkFile.name;
+    const { data: uploadData, error: uploadError } = await supabase.storage
+      .from(STORAGE_BUCKET)
+      .upload(fileName, apkFile, {
+        cacheControl: "3600",
+        upsert: true,
+      });
 
-    // Reset form fields but keep token
-    document.getElementById("version").value = "";
-    document.getElementById("release-name").value = "";
-    document.getElementById("release-notes").value = "";
+    if (uploadError) {
+      throw new Error(uploadError.message);
+    }
 
-    // Refresh releases after a delay to show the new release
-    setTimeout(() => {
-      fetchReleases();
-    }, 3000);
+    showStatus("success", "✅ APK uploaded successfully!");
+
+    // Reset form
+    document.getElementById("apk-file").value = "";
+
+    // Refresh releases
+    fetchReleases();
   } catch (error) {
     console.error("Upload failed:", error);
     showStatus("error", `❌ ${error.message}`);
@@ -109,19 +100,23 @@ async function fetchReleases() {
   const container = document.getElementById("releases-container");
 
   try {
-    const response = await fetch(GITHUB_API);
+    // List files from Supabase Storage
+    const { data: files, error } = await supabase.storage
+      .from(STORAGE_BUCKET)
+      .list();
 
-    if (!response.ok) {
-      throw new Error(`GitHub API returned ${response.status}`);
+    if (error) {
+      throw new Error(error.message);
     }
 
-    const releases = await response.json();
+    // Filter for APK files only
+    const apkFiles = files ? files.filter((f) => f.name.endsWith(".apk")) : [];
 
-    if (releases.length === 0) {
+    if (apkFiles.length === 0) {
       container.innerHTML = `
         <div class="no-releases">
           <p>No releases yet.</p>
-          <p class="mt-1">Click "Upload New Release" above to create your first release</p>
+          <p class="mt-1">Click "Upload New Release" above to upload an APK</p>
         </div>
       `;
       return;
@@ -130,57 +125,42 @@ async function fetchReleases() {
     container.innerHTML = '<div class="releases-list"></div>';
     const list = container.querySelector(".releases-list");
 
-    releases.forEach((release, index) => {
+    apkFiles.forEach((file, index) => {
       const isLatest = index === 0;
-      const apkAssets = release.assets.filter((asset) =>
-        asset.name.toLowerCase().endsWith(".apk"),
-      );
 
-      const releaseDate = new Date(release.published_at).toLocaleDateString(
-        "en-US",
-        {
-          year: "numeric",
-          month: "long",
-          day: "numeric",
-        },
-      );
+      // Get public URL
+      const { data: urlData } = supabase.storage
+        .from(STORAGE_BUCKET)
+        .getPublicUrl(file.name);
+
+      const releaseDate = file.updated_at
+        ? new Date(file.updated_at).toLocaleDateString("en-US", {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+          })
+        : "Unknown date";
+
+      const sizeMB = file.metadata?.size
+        ? (file.metadata.size / (1024 * 1024)).toFixed(1)
+        : "?";
 
       const card = document.createElement("div");
       card.className = "release-card";
 
-      let assetsHtml = "";
-      if (apkAssets.length > 0) {
-        assetsHtml = apkAssets
-          .map((asset) => {
-            const sizeMB = (asset.size / (1024 * 1024)).toFixed(1);
-            return `
-              <a href="${asset.browser_download_url}" class="btn btn-primary">
-                ⬇️ ${asset.name}
-                <span class="asset-size">(${sizeMB} MB)</span>
-              </a>
-            `;
-          })
-          .join("");
-      } else {
-        assetsHtml = `
-          <a href="${release.html_url}" class="btn btn-secondary" target="_blank">
-            View on GitHub
-          </a>
-        `;
-      }
-
       card.innerHTML = `
         <div class="release-header">
           <div>
-            <span class="release-version">${release.name || release.tag_name}</span>
+            <span class="release-version">${file.name}</span>
             ${isLatest ? '<span class="release-tag latest">Latest</span>' : ""}
-            ${release.prerelease ? '<span class="release-tag">Pre-release</span>' : ""}
           </div>
           <span class="release-date">${releaseDate}</span>
         </div>
-        ${release.body ? `<div class="release-notes">${escapeHtml(release.body)}</div>` : ""}
         <div class="release-assets">
-          ${assetsHtml}
+          <a href="${urlData.publicUrl}" class="btn btn-primary" download>
+            ⬇️ Download APK
+            ${sizeMB !== "?" ? `<span class="asset-size">(${sizeMB} MB)</span>` : ""}
+          </a>
         </div>
       `;
 
@@ -191,11 +171,7 @@ async function fetchReleases() {
     container.innerHTML = `
       <div class="error-releases">
         <p>Failed to load releases.</p>
-        <p class="mt-1">
-          <a href="https://github.com/${GITHUB_REPO}/releases" target="_blank">
-            View releases on GitHub →
-          </a>
-        </p>
+        <p class="mt-1">${escapeHtml(error.message)}</p>
       </div>
     `;
   }
@@ -210,5 +186,4 @@ function escapeHtml(text) {
 // Initialize
 document.addEventListener("DOMContentLoaded", () => {
   fetchReleases();
-  loadSavedToken();
 });

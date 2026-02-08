@@ -27,12 +27,15 @@ people-tracker-pages/
 ├── js/
 │   ├── docs.js         # Documentation page logic
 │   ├── open.js         # Deep link handling logic
-│   └── releases.js     # Releases page logic (fetch & upload)
+│   └── releases.js     # Releases page logic (Supabase storage)
+├── debug/
+│   └── test-upload.js  # Test script for Supabase upload
 ├── index.html          # Main landing page
 ├── docs.html           # Documentation page
 ├── docs.md             # Markdown source for documentation
 ├── open.html           # Deep link handler / download page
 ├── releases.html       # Release management page
+├── .env.example        # Environment variables template
 └── README.md
 ```
 
@@ -44,7 +47,7 @@ people-tracker-pages/
 | `docs.html`     | Full documentation rendered from the mobile app README                                                                      |
 | `docs.md`       | Markdown source for documentation (synced from mobile app repo)                                                             |
 | `open.html`     | Deep link handler - attempts to open the app via `peopletracker://` URL scheme, falls back to APK download if not installed |
-| `releases.html` | Displays APK releases and allows uploading new releases to GitHub                                                           |
+| `releases.html` | Displays APK releases and allows uploading new releases to Supabase Storage                                                 |
 
 ## Deep Link Flow
 
@@ -61,8 +64,24 @@ When a user visits `open.html`:
 
 The `releases.html` page allows you to:
 
-- View all GitHub releases with APK download links
-- Upload new releases directly from the browser (requires GitHub PAT with `repo` scope)
+- View available APK releases from Supabase Storage
+- Upload new APK releases (max 100MB, replaces previous version)
+
+### Supabase Storage Setup
+
+APK files are stored in Supabase Storage bucket: `people-tracker-app-apk`
+
+**Configuration:**
+
+1. Copy `.env.example` to `.env` and add your Supabase credentials
+2. Ensure the storage bucket has public read/write policies
+
+**Test upload functionality:**
+
+```bash
+npm install
+node debug/test-upload.js
+```
 
 ## URL Scheme
 
