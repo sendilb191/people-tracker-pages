@@ -164,6 +164,17 @@
   color: var(--color-primary);
 }
 
+.checkbox-group {
+  margin-top: 8px;
+}
+
+.field-help {
+  font-size: 12px;
+  color: var(--color-text-dim);
+  margin-top: 6px;
+  margin-bottom: 0;
+}
+
 .toggle-upload {
   background: none;
   border: 1px solid var(--color-border-light);
