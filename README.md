@@ -26,7 +26,7 @@ people-tracker-pages/
 │   └── releases.css    # Releases page styles
 ├── js/
 │   ├── docs.js         # Documentation page logic
-│   ├── open.js         # Deep link handling logic
+│   ├── open.js         # Deep link handling + Supabase APK download
 │   └── releases.js     # Releases page logic (Supabase storage)
 ├── debug/
 │   └── test-upload.js  # Test script for Supabase upload
@@ -35,7 +35,9 @@ people-tracker-pages/
 ├── docs.md             # Markdown source for documentation
 ├── open.html           # Deep link handler / download page
 ├── releases.html       # Release management page
+├── .env                # Environment variables (gitignored)
 ├── .env.example        # Environment variables template
+├── .gitignore          # Git ignore rules
 └── README.md
 ```
 
@@ -56,25 +58,49 @@ When a user visits `open.html`:
 1. The page attempts to open the app using the `peopletracker://open` URL scheme
 2. If the app opens successfully, the user is redirected to the app
 3. If the app is not installed (after 2.5s timeout), a fallback UI displays:
-   - APK download button
+   - APK download button (fetched from Supabase Storage)
    - Manual "Open App" button
    - Installation instructions
 
-## Releases
+## APK Storage
 
-The `releases.html` page allows you to:
+All APK files are stored in **Supabase Storage** (bucket: `people-tracker-app-apk`).
 
-- View available APK releases from Supabase Storage
-- Upload new APK releases (max 100MB, replaces previous version)
+### How it works
+
+| Page | Functionality |
+|------|---------------|
+| `releases.html` | Upload new APK (replaces old), list available APKs |
+| `open.html` | Dynamically fetches latest APK download URL |
+
+### Upload Flow
+
+1. User selects APK file (max 100MB)
+2. Old APK files are deleted from bucket
+3. New APK is uploaded
+4. Download links update automatically
 
 ### Supabase Storage Setup
 
-APK files are stored in Supabase Storage bucket: `people-tracker-app-apk`
+**Required RLS policies** (run in Supabase SQL Editor):
 
-**Configuration:**
+```sql
+-- Allow public uploads to bucket
+CREATE POLICY "Allow public upload" ON storage.objects
+  FOR INSERT WITH CHECK (bucket_id = 'people-tracker-app-apk');
 
-1. Copy `.env.example` to `.env` and add your Supabase credentials
-2. Ensure the storage bucket has public read/write policies
+-- Allow public read from bucket  
+CREATE POLICY "Allow public read" ON storage.objects
+  FOR SELECT USING (bucket_id = 'people-tracker-app-apk');
+
+-- Allow public delete (for replacing old files)
+CREATE POLICY "Allow public delete" ON storage.objects
+  FOR DELETE USING (bucket_id = 'people-tracker-app-apk');
+
+-- Allow public update (for upsert)
+CREATE POLICY "Allow public update" ON storage.objects
+  FOR UPDATE USING (bucket_id = 'people-tracker-app-apk');
+```
 
 **Test upload functionality:**
 
@@ -89,7 +115,9 @@ The app uses the custom URL scheme: `peopletracker://`
 
 ## Tech Stack
 
-- Pure HTML/CSS/JavaScript
+- Pure HTML/CSS/JavaScript (no frameworks)
+- **Supabase Storage** for APK file hosting
+- Supabase JS Client (CDN)
 - CSS Variables for theming
-- No build tools or dependencies required
 - Mobile-responsive design
+- GitHub Pages for hosting
