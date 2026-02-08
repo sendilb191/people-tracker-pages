@@ -10,9 +10,16 @@ const SUPABASE_ANON_KEY =
 const STORAGE_BUCKET = "people-tracker-app-apk";
 const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB
 
-// Initialize Supabase client
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// Lazy-initialize Supabase client (waits for CDN to load)
+let _supabase = null;
+function getSupabase() {
+  if (!_supabase && window.supabase) {
+    _supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  }
+  return _supabase;
+}
 
+// UI Functions (always available)
 function toggleUploadForm() {
   const form = document.getElementById("upload-form");
   form.classList.toggle("visible");
@@ -39,8 +46,13 @@ async function uploadRelease(event) {
   showStatus("loading", "Deleting old APK...");
 
   try {
+    const client = getSupabase();
+    if (!client) {
+      throw new Error("Supabase not loaded. Please refresh the page.");
+    }
+
     // List all existing files in the bucket
-    const { data: existingFiles, error: listError } = await supabase.storage
+    const { data: existingFiles, error: listError } = await client.storage
       .from(STORAGE_BUCKET)
       .list();
 
@@ -51,7 +63,7 @@ async function uploadRelease(event) {
     // Delete all existing APK files
     if (existingFiles && existingFiles.length > 0) {
       const filesToDelete = existingFiles.map((f) => f.name);
-      const { error: deleteError } = await supabase.storage
+      const { error: deleteError } = await client.storage
         .from(STORAGE_BUCKET)
         .remove(filesToDelete);
 
@@ -64,7 +76,7 @@ async function uploadRelease(event) {
 
     // Upload new APK
     const fileName = apkFile.name;
-    const { data: uploadData, error: uploadError } = await supabase.storage
+    const { data: uploadData, error: uploadError } = await client.storage
       .from(STORAGE_BUCKET)
       .upload(fileName, apkFile, {
         cacheControl: "3600",
@@ -100,8 +112,13 @@ async function fetchReleases() {
   const container = document.getElementById("releases-container");
 
   try {
+    const client = getSupabase();
+    if (!client) {
+      throw new Error("Supabase not loaded yet. Please refresh the page.");
+    }
+
     // List files from Supabase Storage
-    const { data: files, error } = await supabase.storage
+    const { data: files, error } = await client.storage
       .from(STORAGE_BUCKET)
       .list();
 
@@ -129,7 +146,7 @@ async function fetchReleases() {
       const isLatest = index === 0;
 
       // Get public URL
-      const { data: urlData } = supabase.storage
+      const { data: urlData } = client.storage
         .from(STORAGE_BUCKET)
         .getPublicUrl(file.name);
 
