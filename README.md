@@ -68,10 +68,10 @@ All APK files are stored in **Supabase Storage** (bucket: `people-tracker-app-ap
 
 ### How it works
 
-| Page | Functionality |
-|------|---------------|
+| Page            | Functionality                                      |
+| --------------- | -------------------------------------------------- |
 | `releases.html` | Upload new APK (replaces old), list available APKs |
-| `open.html` | Dynamically fetches latest APK download URL |
+| `open.html`     | Dynamically fetches latest APK download URL        |
 
 ### Upload Flow
 
@@ -89,7 +89,7 @@ All APK files are stored in **Supabase Storage** (bucket: `people-tracker-app-ap
 CREATE POLICY "Allow public upload" ON storage.objects
   FOR INSERT WITH CHECK (bucket_id = 'people-tracker-app-apk');
 
--- Allow public read from bucket  
+-- Allow public read from bucket
 CREATE POLICY "Allow public read" ON storage.objects
   FOR SELECT USING (bucket_id = 'people-tracker-app-apk');
 
