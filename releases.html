@@ -84,16 +84,16 @@
               placeholder="What's new in this release..."
             ></textarea>
           </div>
-          <div class="form-group">
-            <label for="apk-file">Release File (APK or JSON for testing)</label>
-            <input type="file" id="apk-file" accept=".apk,.json" required />
-          </div>
+          <p class="form-note">
+            After creating the release, you'll be linked to GitHub to attach the
+            APK file.
+          </p>
           <button
             type="submit"
             class="btn btn-success btn-upload"
             id="upload-btn"
           >
-            📤 Upload Release
+            🚀 Create Release
           </button>
           <div class="upload-status" id="upload-status"></div>
         </form>

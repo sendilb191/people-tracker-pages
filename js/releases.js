@@ -41,20 +41,14 @@ async function uploadRelease(event) {
   const version = document.getElementById("version").value;
   const releaseName = document.getElementById("release-name").value;
   const releaseNotes = document.getElementById("release-notes").value;
-  const apkFile = document.getElementById("apk-file").files[0];
   const statusEl = document.getElementById("upload-status");
   const uploadBtn = document.getElementById("upload-btn");
-
-  if (!apkFile) {
-    showStatus("error", "Please select an APK file");
-    return;
-  }
 
   uploadBtn.disabled = true;
   showStatus("loading", "Creating release...");
 
   try {
-    // Step 1: Create the release
+    // Create the release
     const createResponse = await fetch(GITHUB_API, {
       method: "POST",
       headers: {
@@ -75,51 +69,28 @@ async function uploadRelease(event) {
     }
 
     const release = await createResponse.json();
-    showStatus("loading", "Uploading file...");
 
-    // Step 2: Upload the file as an asset
-    const uploadUrl = release.upload_url.replace("{?name,label}", "");
+    // Note: GitHub's uploads.github.com doesn't support CORS for browser uploads
+    // Direct users to attach files via GitHub's web UI
+    const editUrl = `https://github.com/${GITHUB_REPO}/releases/edit/${version}`;
 
-    // Determine content type based on file extension
-    const fileName = apkFile.name.toLowerCase();
-    let contentType = "application/octet-stream";
-    if (fileName.endsWith(".apk")) {
-      contentType = "application/vnd.android.package-archive";
-    } else if (fileName.endsWith(".json")) {
-      contentType = "application/json";
-    }
-
-    const assetResponse = await fetch(
-      `${uploadUrl}?name=${encodeURIComponent(apkFile.name)}`,
-      {
-        method: "POST",
-        headers: {
-          Authorization: `token ${token}`,
-          "Content-Type": contentType,
-        },
-        body: apkFile,
-      },
+    showStatus(
+      "success",
+      `✅ Release ${version} created! <a href="${editUrl}" target="_blank" style="color: var(--color-primary);">Attach file on GitHub →</a>`,
     );
-
-    if (!assetResponse.ok) {
-      const errorData = await assetResponse.json();
-      throw new Error(errorData.message || "Failed to upload file");
-    }
-
-    showStatus("success", `✅ Release ${version} created successfully!`);
 
     // Save token if remember is checked
     saveToken(token);
 
-    // Reset form and refresh releases
-    document.getElementById("release-form").reset();
-    // Restore token if saved
-    loadSavedToken();
+    // Reset form fields but keep token
+    document.getElementById("version").value = "";
+    document.getElementById("release-name").value = "";
+    document.getElementById("release-notes").value = "";
+
+    // Refresh releases after a delay to show the new release
     setTimeout(() => {
       fetchReleases();
-      document.getElementById("upload-form").classList.remove("visible");
-      statusEl.className = "upload-status";
-    }, 2000);
+    }, 3000);
   } catch (error) {
     console.error("Upload failed:", error);
     showStatus("error", `❌ ${error.message}`);
@@ -131,7 +102,7 @@ async function uploadRelease(event) {
 function showStatus(type, message) {
   const statusEl = document.getElementById("upload-status");
   statusEl.className = `upload-status visible status status-${type}`;
-  statusEl.textContent = message;
+  statusEl.innerHTML = message;
 }
 
 async function fetchReleases() {
