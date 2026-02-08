@@ -42,7 +42,6 @@ async function uploadRelease(event) {
   const releaseName = document.getElementById("release-name").value;
   const releaseNotes = document.getElementById("release-notes").value;
   const apkFile = document.getElementById("apk-file").files[0];
-  const prerelease = document.getElementById("prerelease").checked;
   const statusEl = document.getElementById("upload-status");
   const uploadBtn = document.getElementById("upload-btn");
 
@@ -66,7 +65,7 @@ async function uploadRelease(event) {
         tag_name: version,
         name: releaseName,
         body: releaseNotes,
-        prerelease: prerelease,
+        prerelease: false,
       }),
     });
 
