@@ -13,12 +13,13 @@ People Tracker is a real-time location sharing app for friends and family. This 
 
 ## Pages
 
-| File         | Description                                                                                                                 |
-| ------------ | --------------------------------------------------------------------------------------------------------------------------- |
-| `index.html` | Main landing page with app branding and description                                                                         |
-| `docs.html`  | Full documentation rendered from the mobile app README                                                                      |
-| `docs.md`    | Markdown source for documentation (synced from mobile app repo)                                                             |
-| `open.html`  | Deep link handler - attempts to open the app via `peopletracker://` URL scheme, falls back to APK download if not installed |
+| File            | Description                                                                                                                 |
+| --------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `index.html`    | Main landing page with app branding and description                                                                         |
+| `docs.html`     | Full documentation rendered from the mobile app README                                                                      |
+| `docs.md`       | Markdown source for documentation (synced from mobile app repo)                                                             |
+| `open.html`     | Deep link handler - attempts to open the app via `peopletracker://` URL scheme, falls back to APK download if not installed |
+| `releases.html` | Displays APK releases from GitHub Releases with download links                                                              |
 
 ## Deep Link Flow
 
