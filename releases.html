@@ -40,6 +40,12 @@
               placeholder="ghp_xxxxxxxxxxxx"
               required
             />
+            <div class="token-options">
+              <label class="checkbox-label">
+                <input type="checkbox" id="remember-token" /> Remember token
+              </label>
+              <button type="button" class="btn-link" onclick="clearSavedToken()">Clear saved token</button>
+            </div>
             <p class="token-help">
               Need a token?
               <a

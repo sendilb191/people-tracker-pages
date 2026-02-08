@@ -4,10 +4,34 @@
 
 const GITHUB_REPO = "sendilb191/people-tracker-pages";
 const GITHUB_API = `https://api.github.com/repos/${GITHUB_REPO}/releases`;
+const TOKEN_STORAGE_KEY = "pt_github_token";
 
 function toggleUploadForm() {
   const form = document.getElementById("upload-form");
   form.classList.toggle("visible");
+}
+
+function loadSavedToken() {
+  const savedToken = localStorage.getItem(TOKEN_STORAGE_KEY);
+  if (savedToken) {
+    document.getElementById("github-token").value = savedToken;
+    document.getElementById("remember-token").checked = true;
+  }
+}
+
+function saveToken(token) {
+  const rememberToken = document.getElementById("remember-token").checked;
+  if (rememberToken && token) {
+    localStorage.setItem(TOKEN_STORAGE_KEY, token);
+  } else {
+    localStorage.removeItem(TOKEN_STORAGE_KEY);
+  }
+}
+
+function clearSavedToken() {
+  localStorage.removeItem(TOKEN_STORAGE_KEY);
+  document.getElementById("github-token").value = "";
+  document.getElementById("remember-token").checked = false;
 }
 
 async function uploadRelease(event) {
@@ -75,8 +99,13 @@ async function uploadRelease(event) {
 
     showStatus("success", `✅ Release ${version} created successfully!`);
 
+    // Save token if remember is checked
+    saveToken(token);
+
     // Reset form and refresh releases
     document.getElementById("release-form").reset();
+    // Restore token if saved
+    loadSavedToken();
     setTimeout(() => {
       fetchReleases();
       document.getElementById("upload-form").classList.remove("visible");
@@ -199,4 +228,7 @@ function escapeHtml(text) {
 }
 
 // Initialize
-document.addEventListener("DOMContentLoaded", fetchReleases);
+document.addEventListener("DOMContentLoaded", () => {
+  fetchReleases();
+  loadSavedToken();
+});
