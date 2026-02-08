@@ -79,7 +79,7 @@ async function uploadRelease(event) {
 
     // Step 2: Upload the file as an asset
     const uploadUrl = release.upload_url.replace("{?name,label}", "");
-    
+
     // Determine content type based on file extension
     const fileName = apkFile.name.toLowerCase();
     let contentType = "application/octet-stream";
@@ -88,7 +88,7 @@ async function uploadRelease(event) {
     } else if (fileName.endsWith(".json")) {
       contentType = "application/json";
     }
-    
+
     const assetResponse = await fetch(
       `${uploadUrl}?name=${encodeURIComponent(apkFile.name)}`,
       {

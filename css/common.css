@@ -317,3 +317,17 @@ p {
     margin-left: 0;
   }
 }
+
+/* Footer */
+.site-footer {
+  text-align: center;
+  padding: 20px;
+  margin-top: 40px;
+  border-top: 1px solid var(--color-border);
+  color: var(--color-text-dim);
+  font-size: 12px;
+}
+
+.site-footer .deploy-time {
+  opacity: 0.7;
+}
