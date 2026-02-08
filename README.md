@@ -2,6 +2,8 @@
 
 Landing pages and deep link handler for the People Tracker mobile app.
 
+**Live Site:** https://sendilb191.github.io/people-tracker-pages/
+
 ## Overview
 
 People Tracker is a real-time location sharing app for friends and family. This repository contains the web pages used to:
